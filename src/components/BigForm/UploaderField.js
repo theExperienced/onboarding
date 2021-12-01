@@ -4,7 +4,7 @@ import AttachFileIcon from "@material-ui/icons/AttachFile";
 import { useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { formDataActions } from "../store/formDataSlice";
+import fileDataSlice from "../store/fileDataSlice";
 import { withStyles } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import InfoIcon from "@material-ui/icons/Info";
@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   },
 });
 const UploaderField = (props) => {
-  const state = useSelector((state) => state.formData.fullData);
+  const state = useSelector((state) => state.fileData);
   const dispatch = useDispatch();
   const [isUploaded, setUploaded] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -35,14 +35,14 @@ const UploaderField = (props) => {
       ) {
         console.log(target.id);
         await axios
-          .post(
+          .put(
             `http://10.0.0.197:3030/api/file/289334a4-50f3-11ec-be49-d08e7912923c/${target.id}`,
             formData
           )
           .then((res) => {
             console.log(res);
             dispatch(
-              formDataActions.fileUpload({
+              fileDataSlice.actions.putFile({
                 id: props.id,
                 value: target.files[0],
               })

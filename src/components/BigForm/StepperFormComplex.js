@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { Box, makeStyles, createStyles } from "@material-ui/core";
 import { Stepper } from "@material-ui/core";
 import { Step } from "@material-ui/core";
@@ -11,7 +11,10 @@ import TermsForm from "./TermsForm";
 import ProgressBar from "./ProgressBar";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { formDataActions } from "../store/formDataSlice";
+import FieldContext from "../../context/fields";
+import FileContext from "../../context/files";
+import fieldDataActions from "../store/fieldDataSlice";
+import fileDataActions from "../store/fileDataSlice";
 import { useDispatch } from "react-redux";
 
 const steps = ["Submit Documentation", "Attach Documents", "Terms of Use"];
@@ -71,37 +74,61 @@ const useStyles = makeStyles((theme) => ({
 
 const StepperFormComplex = () => {
   // const uuid = React.useRef(window.search); ///////FIXXXXXXXXXX
-  const formState = useSelector((state) => state.formData);
-  const totalNumOfFields = React.useRef(Object.keys(formState).length);
+  // const fileState = useSelector((state) => state.fileData);
+  // const fieldState = useSelector((state) => state.fieldData);
+  // const totalNumOfFields = React.useRef(Object.keys(formState).length);
   const [barValue, setBarValue] = React.useState(0);
-  const [nonEmptyFields, setNonEmptyFields] = React.useState(0);
+  // const [nonEmptyFields, setNonEmptyFields] = React.useState(0);
   const dispatch = useDispatch();
   const classes = useStyles();
 
+  const { fieldState, setFieldState } = useContext(FieldContext);
+  const { fileState, setFileState } = useContext(FileContext);
+
   useEffect(() => {
-    console.log("inside Use effect");
-    axios
-      .all([
+    console.log("regular stepper use effect", fileState);
+  }, [fileState]);
+
+  useEffect(async () => {
+    try {
+      const data = await axios.all([
         axios.get(
-          "http://10.0.0.197:3030/api/onboarding/289334a4-50f3-11ec-be49-d08e7912923c"
+          "http://10.0.0.197:3030/api/onboarding/51059234-52b9-11ec-be49-d08e7912923c"
         ),
         axios.get(
-          "http://10.0.0.197:3030/api/file/289334a4-50f3-11ec-be49-d08e7912923c"
+          "http://10.0.0.197:3030/api/file/51059234-52b9-11ec-be49-d08e7912923c"
         ),
-      ])
-      .then(
-        axios.spread(function (res1, res2) {
-          const textFields = res1.data[0];
-          const fileFields = {};
-          res2.data.forEach((file) => {
-            fileFields[file.field_name] = file.file_name;
-          });
-          const fullData = { ...textFields, ...fileFields };
-          dispatch(formDataActions.uploadFields(fullData));
-          console.log("formState", fullData);
-        })
-      )
-      .catch((err) => console.log(err));
+      ]);
+      const [res1, res2] = data;
+      console.log(data, "inside Use effect");
+      const textFields = res1.data[0];
+      const fileFields = {};
+      res2.data.forEach((file) => {
+        fileFields[file.field_name] = file.file_name;
+      });
+      console.log("file fields on load", fileFields);
+      const fullData = { ...textFields, ...fileFields };
+      setFieldState(textFields);
+      setFileState(fileFields);
+      // dispatch(formDataActions.uploadFields(fullData));
+      console.log("get state on app load", setFieldState);
+    } catch (err) {
+      console.log("error in get state on app load", err);
+    }
+
+    // .then(
+    //   axios.spread(function (res1, res2) {
+    //     const textFields = res1.data[0];
+    //     const fileFields = {};
+    //     res2.data.forEach((file) => {
+    //       fileFields[file.field_name] = file.file_name;
+    //     });
+    //     const fullData = { ...textFields, ...fileFields };
+    //     dispatch(formDataActions.uploadFields(fullData));
+    //     console.log("get state on app load", fullData);
+    //   })
+    // )
+    // .catch((err) => console.log(err));
   }, []);
   //   const fields = {
   //     asd:'asdsad',
@@ -190,7 +217,7 @@ const StepperFormComplex = () => {
           <React.Fragment>
             <Typography sx={{ mt: 2, mb: 1 }}>
               {activeStep === 0 ? (
-                <PseudoForm value={formState} />
+                <PseudoForm value={fieldState} />
               ) : activeStep === 1 ? (
                 <FileForm />
               ) : (

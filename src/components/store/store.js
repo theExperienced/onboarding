@@ -1,8 +1,13 @@
-import { configureStore } from "@reduxjs/toolkit";
-import formDataReducer, { formDataSlice } from "./formDataSlice";
+import { configureStore, combineReducers, createStore } from "@reduxjs/toolkit";
+import fileDataSlice from "./fileDataSlice";
+import fieldDataSlice from "./fieldDataSlice";
+import authDataSlice from "./authDataSlice";
 
-const store = configureStore({
-    reducer:{formData:formDataSlice.reducer}
-})
+const rootReducer = combineReducers({
+  fileReducer: fileDataSlice.reducer,
+  fieldReducer: fieldDataSlice.reducer,
+  authReducer: authDataSlice.reducer,
+});
+const store = configureStore({ reducer: rootReducer });
 
 export default store;

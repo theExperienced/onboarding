@@ -1,7 +1,8 @@
-import * as React from "react";
+import React, { useEffect, useContext } from "react";
 import { Box, makeStyles, Typography } from "@material-ui/core";
 import { formData } from "../../utils/formData";
 import UploaderField from "./UploaderField";
+import FileContext from "../../context/files";
 import { useSelector } from "react-redux";
 import DynamicInputGroup from "./DynamicInputGroup";
 
@@ -18,8 +19,10 @@ const useStyles = makeStyles({
 
 const FileForm = ({ step }) => {
   const classes = useStyles();
-  const state = useSelector((state) => state.formData.fullData);
-  console.log(state);
+  const { fileState, setFileState } = useContext(FileContext);
+  // const state = useSelector((state) => state.fileData);
+
+  useEffect(() => {});
   return (
     <Box>
       <Typography>Documents</Typography>
