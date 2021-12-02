@@ -1,26 +1,31 @@
-import { useState, useEffect, useContext, useMemo } from "react";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import fieldDataSlice from "../store/fileDataSlice";
-import { StyledTextField } from "./PseudoForm";
+import { useState, useEffect, useContext, useMemo } from 'react';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import fieldDataSlice from '../store/fileDataSlice';
+import { StyledTextField } from './PseudoForm';
 // import useDebounce from '../../hooks/useDebounce';
-import debounce from "lodash.debounce";
-import { DebounceInput } from "react-debounce-input";
-import { makeStyles, TextField } from "@material-ui/core";
-import FieldContext from "../../context/fields";
+// import debounce from 'lodash.debounce';
+// import { DebounceInput } from 'react-debounce-input';
+import { makeStyles, TextField } from '@material-ui/core';
+import FieldContext from '../../context/fields';
 
+import { useDebouncedCallback } from 'use-debounce';
+
+// const useStyles = makeStyles({textField:{
+// '&:'
+// }})
 const useStyles = makeStyles({
-  root: {
+  textField: {
     // borderRadius: "0",
-    border: "0px",
-    "& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-fullWidth.MuiInputBase-formControl":
+    border: '0px',
+    '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-fullWidth.MuiInputBase-formControl':
       {
         // borderRadius: "0",
-        border: "0px",
+        border: '0px',
       },
-    "& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-fullWidth.MuiInputBase-formControl":
+    '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-fullWidth.MuiInputBase-formControl':
       {
-        borderRadius: "0",
+        borderRadius: '0',
         // border: "1px solid gray",
       },
   },
@@ -30,33 +35,33 @@ const DispatcherField = (props) => {
   // const ownState = useSelector((state) => state[props.formState[props.id]]);
   // const [isSearching, setIsSearching] = useState(false);
   const classes = useStyles();
-  useEffect(() => {
-    console.log("dispatcher ownState", props);
-  }, [props]);
-  const dispatch = useDispatch();
+  // useEffect(() => {
+  //   console.log('dispatcher ownState', props);
+  // }, [props]);
+  // const dispatch = useDispatch();
 
   const handleChange = async (e) => {
-    console.log("handling change in dispatcher");
+    console.log('handling change in dispatcher', e.target.value);
     // e.preventDefault();
     //////redux updat
     const fieldToUpdate = {
       field: e.target.id,
       value: e.target.value,
     };
-    console.log("debounce", fieldToUpdate);
+    // console.log('debounce', fieldToUpdate);
     axios
       .put(
-        "http://10.0.0.197:3030/api/onboarding/51059234-52b9-11ec-be49-d08e7912923c",
+        'http://10.0.0.197:3030/api/onboarding/51059234-52b9-11ec-be49-d08e7912923c',
         { fieldToUpdate }
       )
       .then((res) => {
-        console.log("res", res);
+        console.log('res', res);
         if (res.status === 200) {
           setFieldState({ [e.target.id]: e.target.id, ...fieldState });
         }
       })
       .catch((err) => {
-        console.log("err", err);
+        console.log('err', err);
       });
 
     // try {
@@ -77,23 +82,27 @@ const DispatcherField = (props) => {
     // axios.put('randomURLasdasdsadsad', data);
   };
 
-  const debouncedHandleChange = (e) => {
-    console.log("e.target", e.target.value);
-    debounce(() => handleChange(e), 300);
-  };
+  // const debouncedHandleChange = debounce(handleChange, 50);
+
+  const debounced = useDebouncedCallback(handleChange, 300);
 
   return (
     <TextField
-      className={classes.root}
+      className={classes.textField}
       id={props.id}
       // InputLabelProps={{
       //   style: { color: "#1a1616" },
       // }}
       fullWidth
-      onChange={debouncedHandleChange}
-      label={!props.value ? props.label : ""}
-      value={props.value}
-      variant="outlined"
+      // onChange={debouncedHandleChange}
+      onChange={(e) => {
+        setFieldState((prev) => prev + fieldState[props.id]);
+        debounced(e);
+      }}
+      label={props.label}
+      // value={props.value}
+      value={fieldState[props.id]}
+      variant='outlined'
     />
   );
 };
